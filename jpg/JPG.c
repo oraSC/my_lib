@@ -271,7 +271,43 @@ pJpgInfo_t div_jpg(pJpgInfo_t pSrc_jpginfo,int COLS, int ROWS, pJpgInfo_t pdiv_j
 }
 
 
+int select_decompress_jpg2buffer(pJpgInfo_t pdst_jpginfo, char *path, int x, int y, int width, int height)
+{
 
+	//加载原图
+	JpgInfo_t src_jpginfo;
+	decompress_jpg2buffer(&src_jpginfo, path);
+	
+	//判断区域是否合法
+	if(x > src_jpginfo.width || y > src_jpginfo.height || (x + width) > src_jpginfo.width || (y + height) > src_jpginfo.height)
+	{
+		printf("select zone if outof src jpg\n");
+		return -1;
+	}
+
+	//读取参数
+	pdst_jpginfo->width   = width;
+	pdst_jpginfo->height  = height;
+	pdst_jpginfo->rowsize = width * (src_jpginfo.bicount / 8);
+	pdst_jpginfo->bicount = src_jpginfo.bicount;
+	pdst_jpginfo->buff    = (unsigned char  *)malloc(pdst_jpginfo->rowsize * pdst_jpginfo->height);
+	//读取制定区域
+	//起始点
+	int s_index = x*(src_jpginfo.bicount / 8) + y*src_jpginfo.rowsize;
+	for(int rows = 0; rows < height; rows++)
+	{
+	
+		memcpy(pdst_jpginfo->buff + rows*pdst_jpginfo->rowsize, src_jpginfo.buff + s_index + rows*src_jpginfo.rowsize, pdst_jpginfo->rowsize);	
+	
+	}
+	
+	//释放资源
+	free(src_jpginfo.buff);
+
+	return 0;
+
+
+}
 
 
 
