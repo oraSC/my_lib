@@ -181,10 +181,6 @@ bool decompress_jpg2bmp(char *src_path, char *dst_path)
 int jpg_resize(pJpgInfo_t src_pjpginfo, pJpgInfo_t dst_pjpginfo, int width, int height)
 {
 
-	/*
-	 *bug:缩小具有越界的问题
-	 *
-	 */
 
 	//定义dst_pjpginfo
 	dst_pjpginfo->width = width;
@@ -194,8 +190,8 @@ int jpg_resize(pJpgInfo_t src_pjpginfo, pJpgInfo_t dst_pjpginfo, int width, int 
 
 
 	//计算比值
-	int ratio_width = 100 * width / src_pjpginfo->width;
-	int ratio_height = 100 * height / src_pjpginfo->height;
+	float ratio_width = (float)(100 * width) / (float)src_pjpginfo->width;
+	float ratio_height = (float)(100 * height) / (float)src_pjpginfo->height;
 
 	//申请空间
 	dst_pjpginfo->buff = malloc(width * height * 3);
@@ -209,10 +205,10 @@ int jpg_resize(pJpgInfo_t src_pjpginfo, pJpgInfo_t dst_pjpginfo, int width, int 
 	{
 		for(int cols = 0; cols < width; cols++)
 		{
-			last = rows*100/ratio_height*src_pjpginfo->width * 3 + cols*100/ratio_width*3;	
+			last = (int)(((float)(rows*100))/ratio_height)*src_pjpginfo->width * 3 + (int)((float)(cols*100)/ratio_width)*3;	
 			//printf("%d\n", last);
-			if(last < src_pjpginfo->rowsize * src_pjpginfo->height)
-			memcpy(dst_pjpginfo->buff + rows * dst_pjpginfo->rowsize + cols*3, src_pjpginfo->buff + rows*100/ratio_height*src_pjpginfo->width * 3 + cols*100/ratio_width*3, 3);
+			//if(last < src_pjpginfo->rowsize * src_pjpginfo->height)
+			memcpy(dst_pjpginfo->buff + rows * dst_pjpginfo->rowsize + cols*3, src_pjpginfo->buff + last, 3);
 		}
 	
 	
